@@ -109,9 +109,9 @@ app.post('/api/apply', upload.fields([
       console.log('Validation failed: Missing resume');
       return res.status(400).json({ message: 'Resume is required' });
     }
-    
-    if(!cashfreeOrderId || !paymentSessionId) {
-        return res.status(400).json({ message: 'Payment verification failed' });
+
+    if (!cashfreeOrderId || !paymentSessionId) {
+      return res.status(400).json({ message: 'Payment verification failed' });
     }
 
     const resumeUrl = `/uploads/${req.files.resume[0].filename}`;
@@ -153,48 +153,48 @@ app.post('/api/apply', upload.fields([
 
 // POST /api/payment/create-order
 app.post('/api/payment/create-order', async (req, res) => {
-    try {
-        const { name, email, phone, amount } = req.body;
-        
-        let request = {
-            "order_amount": amount || 1999.00,
-            "order_currency": "INR",
-            "customer_details": {
-                "customer_id": phone || name.replace(/\s/g, '').substring(0, 10),
-                "customer_name": name,
-                "customer_email": email,
-                "customer_phone": phone
-            },
-            "order_meta": {
-                "return_url": "http://localhost:5173/success?order_id={order_id}"
-            }
-        };
+  try {
+    const { name, email, phone, amount } = req.body;
 
-        const response = await Cashfree.PGCreateOrder("2023-08-01", request);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Create Order Error:', error.response?.data || error.message);
-        res.status(500).json({ message: 'Failed to create Cashfree order' });
-    }
+    let request = {
+      "order_amount": amount || 1999.00,
+      "order_currency": "INR",
+      "customer_details": {
+        "customer_id": phone || name.replace(/\s/g, '').substring(0, 10),
+        "customer_name": name,
+        "customer_email": email,
+        "customer_phone": phone
+      },
+      "order_meta": {
+        "return_url": "http://localhost:5173/success?order_id={order_id}"
+      }
+    };
+
+    const response = await Cashfree.PGCreateOrder("2023-08-01", request);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Create Order Error:', error.response?.data || error.message);
+    res.status(500).json({ message: 'Failed to create Cashfree order' });
+  }
 });
 
 // POST /api/payment/verify
 app.post('/api/payment/verify', async (req, res) => {
-    try {
-        const { orderId } = req.body;
-        const response = await Cashfree.PGOrderFetchPayments("2023-08-01", orderId);
-        
-        const isPaid = response.data.some(payment => payment.payment_status === 'SUCCESS');
-        
-        if (isPaid) {
-            res.json({ verified: true, message: "Payment verified successfully" });
-        } else {
-            res.status(400).json({ verified: false, message: "Payment pending or failed" });
-        }
-    } catch (error) {
-        console.error('Verify Order Error:', error.response?.data || error.message);
-        res.status(500).json({ message: 'Failed to verify payment' });
+  try {
+    const { orderId } = req.body;
+    const response = await Cashfree.PGOrderFetchPayments("2023-08-01", orderId);
+
+    const isPaid = response.data.some(payment => payment.payment_status === 'SUCCESS');
+
+    if (isPaid) {
+      res.json({ verified: true, message: "Payment verified successfully" });
+    } else {
+      res.status(400).json({ verified: false, message: "Payment pending or failed" });
     }
+  } catch (error) {
+    console.error('Verify Order Error:', error.response?.data || error.message);
+    res.status(500).json({ message: 'Failed to verify payment' });
+  }
 });
 
 // GET /api/applications - Get all applications (admin)
@@ -247,6 +247,23 @@ app.patch('/api/applications/:id', async (req, res) => {
     console.error('Error updating application:', error);
     res.status(500).json({ message: 'Server error while updating application' });
   }
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'CS Internship Application Server is running',
+    status: 'active',
+    availableEndpoints: {
+      health: '/api/health',
+      apply: 'POST /api/apply',
+      payment: {
+        createOrder: 'POST /api/payment/create-order',
+        verify: 'POST /api/payment/verify'
+      },
+      applications: 'GET /api/applications'
+    }
+  });
 });
 
 // Health check endpoint
