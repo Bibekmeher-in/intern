@@ -1,0 +1,55 @@
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Client build
+client/dist/
+client/build/
+
+# Server
+server/uploads/
+server/database/applications.xlsx
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS specific
+Thumbs.db
+.DS_Store
+.env.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+.temp/
+.cache/
+tmp/
+
+# Testing
+coverage/
+.nyc_output/
